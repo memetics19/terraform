@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Hello {{name}}!!!!!</h1>
+
+<form action="generateOTP" method="POST">
+
+    {% csrf_token %}
+
+     Mobile : <input type="text" name="phoneNumber"><br>
+    <input type="submit">
+    Result : {{result}}
+
+</form>
+
+{% endblock%}
