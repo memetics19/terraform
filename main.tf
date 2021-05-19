@@ -1,7 +1,7 @@
 provider "aws" {
   region = "us-east-1"
-  access_key = "AKIAS42P3T47PPRWP2MO"
-  secret_key = "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"
+  access_key = "value"
+  secret_key = "value"
 }
 
 resource "aws_vpc" "main" {
@@ -78,7 +78,7 @@ variable "AMI" {
     }
 }
 variable "AWS_REGION" {    
-    default = "us-east-1"
+    default = "eu-west-2"
 }
 
 resource "aws_instance" "ec2_1" {
@@ -88,7 +88,7 @@ resource "aws_instance" "ec2_1" {
     vpc_security_group_ids = ["${aws_security_group.ssh.id}"]
 }
 
-resource "aws_instance" "ec2_2" {
+resource "aws_instace" "ec2_2" {
     ami = "${lookup(var.AMI, var.AWS_REGION)}"
     instance_type  = "t2.micro"
     subnet_id = "${aws_subnet.private_1.id}"
