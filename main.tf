@@ -121,7 +121,7 @@ variable "AMI" {
     }
 }
 variable "AWS_REGION" {    
-    default = "us-east-1"
+    default = "eu-west-2"
 }
 
 resource "aws_instance" "ec2_1" {
@@ -136,7 +136,7 @@ resource "aws_instance" "ec2_1" {
     }
 }
 
-resource "aws_instance" "ec2_2" {
+resource "aws_instace" "ec2_2" {
     ami = "${lookup(var.AMI, var.AWS_REGION)}"
     instance_type  = "t2.micro"
     subnet_id = "${aws_subnet.private_1.id}"
