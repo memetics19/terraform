@@ -1,7 +1,7 @@
 provider "aws" {
   region = "us-east-1"
-  access_key = "AKIAS42P3T47PPRWP2MO"
-  secret_key = "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"
+  access_key = "value"
+  secret_key = "value"
 }
 
 resource "aws_vpc" "main" {
@@ -32,6 +32,7 @@ resource "aws_subnet" "public_2" {
   }
 }
 
+
 resource "aws_subnet" "private_1" {
   vpc_id                  = "${aws_vpc.main.id}"
   cidr_block              = "10.0.3.0/24"
@@ -53,6 +54,36 @@ resource "aws_subnet" "private_2" {
   }
 }
 
+resource "aws_internet_gateway" "igw_1"{
+  vpc_id = "${aws_vpc.main.id}"
+  tags = { 
+    name = "Main_Gatway"
+  } 
+}
+
+resource "aws_route_table" "route_1" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "10.0.3.0/24"
+    gateway_id = aws_internet_gateway.igw_1.id
+  }
+
+  route {
+    ipv6_cidr_block        = "::/0"
+    gateway_id = aws_internet_gateway.igw_1.id
+  }
+
+  tags = {
+    Name = "main_route"
+  }
+}
+
+resource "aws_route_table_association" "route_a_1" {
+  subnet_id = aws_subnet.private_1.id
+  route_table_id = aws_route_table.route_1.id
+}
+
 resource "aws_security_group" "ssh" {
     vpc_id = "${aws_vpc.main.id}"
     
@@ -70,7 +101,19 @@ resource "aws_security_group" "ssh" {
         cidr_blocks = ["10.0.1.0/24"]
     } 
 }
+resource "aws_network_interface" "niw" {
+  subnet_id       = aws_subnet.private_1.id
+  private_ips     = ["10.0.3.0"]
+  security_groups = [aws_security_group.ssh.id]
+}
 
+resource "aws_eip" "eip_main"{
+  vpc = true
+  network_interface =  aws_network_interface.niw.id
+  associate_with_private_ip = "10.0.3.0"
+
+
+} 
 variable "AMI" {    
     default = {
         eu-west-2 = "ami-03dea29b0216a1e03"
@@ -85,7 +128,12 @@ resource "aws_instance" "ec2_1" {
     ami = "${lookup(var.AMI, var.AWS_REGION)}"
     instance_type = "t2.micro"
     subnet_id = "${aws_subnet.public_1.id}"
+    key_name = "test"
     vpc_security_group_ids = ["${aws_security_group.ssh.id}"]
+    network_interface  { 
+      device_index = 0
+      network_interface_id = aws_network_interface.niw.id
+    }
 }
 
 resource "aws_instance" "ec2_2" {
