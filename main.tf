@@ -112,8 +112,17 @@ resource "aws_eip" "eip_main"{
   network_interface =  aws_network_interface.niw.id
   associate_with_private_ip = "10.0.3.0"
 
+}
 
-} 
+resource "aws_nat_gateway" "nat" {
+  allocation_id = "${aws_eip.eip_main.id}"
+  subnet_id     =  "${aws_subnet.public_1.id}"
+  depends_on    = [aws_internet_gateway.ig]
+  tags = {
+    Name        = "nat"
+  }
+}
+
 variable "AMI" {    
     default = {
         eu-west-2 = "ami-03dea29b0216a1e03"
@@ -136,7 +145,7 @@ resource "aws_instance" "ec2_1" {
     }
 }
 
-resource "aws_instace" "ec2_2" {
+resource "aws_instance" "ec2_2" {
     ami = "${lookup(var.AMI, var.AWS_REGION)}"
     instance_type  = "t2.micro"
     subnet_id = "${aws_subnet.private_1.id}"
